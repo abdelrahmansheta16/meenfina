@@ -16,3 +16,16 @@ subscription AnswerUpdated {
   }
 }
 `
+export const NEXT_SUB = gql`
+subscription Subscription {
+  nextUpdated
+}
+`
+export const PLAYERS_SUB = gql`
+subscription PlayersUpdated {
+  playersUpdated {
+    id
+    name
+  }
+}
+`

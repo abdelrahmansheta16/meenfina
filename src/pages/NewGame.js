@@ -5,7 +5,7 @@ import AddTask from '../components/AddTask';
 import ShowTask from '../components/ShowTask';
 import { useNavigate } from "react-router-dom"
 import { useMutation, useQuery } from '@apollo/client';
-import { NEW_GAME, UPDATE_ANSWER } from '../graphql/mutations';
+import { JOIN_PLAYER, NEW_GAME, UPDATE_ANSWER } from '../graphql/mutations';
 import { useCookies } from 'react-cookie';
 import { QUESTION } from '../graphql/queries';
 import { useRef } from 'react';
@@ -14,8 +14,9 @@ import Randomstring from 'randomstring';
 
 export const NewGame = () => {
     const [createGame, { data, loading, error }] = useMutation(NEW_GAME);
+    const [joinPlayer, result] = useMutation(JOIN_PLAYER);
     const [namesCookies, setnamesCookies, removenamesCookies] = useCookies(['name']);
-    const [questions, setQuestions] = useState([])
+    const [questions, setQuestions] = useState()
     const mounted = useRef(false);
     const [cookies, setCookie, removeCookie] = useCookies(['game']);
     const [ccookies, setcCookie, removecCookie] = useCookies(['currentIndex']);
@@ -87,7 +88,8 @@ export const NewGame = () => {
         console.log("-----")
         return navigate("/group")
     }
-    const handleStart = () => {
+    const handleStart = (event) => {
+        event.preventDefault()
         const nameList = tasklist.map(a => a.name)
         let questionList = questions.map((a) => ({ selects: 0, question: a.question }))
         questionList = questionList.sort(function () { return Math.random() - 0.5 });
@@ -100,10 +102,12 @@ export const NewGame = () => {
             },
             onCompleted(data) {
                 console.log(data)
+                const token = Randomstring.generate(10)
+                const id = data.createGame.id
                 setCookie('game', data.createGame, { path: '/' })
-                setCookie('token', Randomstring.generate(), { path: '/' })
+                setCookie('token', token, { path: '/' })
                 setcCookie('currentIndex', 0, { path: '/' })
-                return navigate("/game")
+                return navigate(`/game/${id}`, { state: data.createGame })
             }
         })
     }

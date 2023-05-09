@@ -5,11 +5,12 @@ import { useState } from 'react';
 import { useCookies } from 'react-cookie';
 import { useNavigate } from 'react-router-dom';
 import { GAME } from '../graphql/queries';
-import { useLazyQuery, useQuery } from '@apollo/client';
+import { useLazyQuery, useMutation, useQuery } from '@apollo/client';
 import Randomstring from 'randomstring';
+import { JOIN_PLAYER } from '../graphql/mutations';
 export const JoinGame = () => {
     const [gameId, setGameId] = useState("")
-    const [getGame,{ loading, error, data }] = useLazyQuery(GAME);
+    const [getGame, { loading, error, data }] = useLazyQuery(GAME);
     const navigate = useNavigate()
     const [cookies, setCookie, removeCookie] = useCookies(['game']);
     const [ccookies, setcCookie, removecCookie] = useCookies(['currentIndex']);
@@ -17,13 +18,15 @@ export const JoinGame = () => {
     const handleSubmit = (event) => {
         event.preventDefault()
         getGame({
-            variables:{gameId},
+            variables: { gameId },
             onCompleted(data) {
-                console.log(data.game)
+                console.log(data)
+                const token = Randomstring.generate(10)
+                const id = data.game.id
                 setCookie('game', data.game, { path: '/' })
-                setCookie('token', Randomstring.generate(), { path: '/' })
+                setCookie('token', token, { path: '/' })
                 setcCookie('currentIndex', 0, { path: '/' })
-                return navigate("/game")
+                return navigate(`/name`, { state: data.game })
             },
             onError(data) {
                 console.log(data)

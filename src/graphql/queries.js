@@ -4,7 +4,11 @@ export const GAME = gql`
 query Game($gameId: ID!) {
   game(id: $gameId) {
     id
-    names
+    initialPlayers
+    players {
+      id
+      name
+    }
     questions {
       question
       selects

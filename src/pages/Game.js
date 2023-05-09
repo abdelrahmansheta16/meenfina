@@ -11,22 +11,30 @@ import { useLayoutEffect } from 'react';
 import { useRef } from 'react';
 import { Box, Button, CircularProgress } from '@mui/material';
 import { get, useCookies } from 'react-cookie'
-import { ANSWERS_SUB, ANSWER_SUB, SELECT_SUB } from '../graphql/subscriptions';
-import { UPDATE_ANSWER, UPDATE_ANSWERS, UPDATE_GAME } from '../graphql/mutations';
+import { ANSWERS_SUB, ANSWER_SUB, NEXT_SUB, PLAYERS_SUB, SELECT_SUB } from '../graphql/subscriptions';
+import { EXIT_PLAYER, JOIN_PLAYER, UPDATE_ANSWER, UPDATE_ANSWERS, UPDATE_GAME, UPDATE_NEXTS } from '../graphql/mutations';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { toast } from 'react-toastify';
+import { useLocation, useNavigate } from 'react-router-dom';
 
-export const Game = () => {
+export const Game = ({ data }) => {
+    const location = useLocation()
+    const navigate = useNavigate()
     const [game, setGame] = useState({})
-    const [isDone, setIsDone] = useState(false)
+    const [gameStarted, setGameStarted] = useState()
+    const [status, setStatus] = useState(null)
     const [updateGame, { data1, loading1, error1 }] = useMutation(UPDATE_GAME);
+    const [exitPlayer, exitData] = useMutation(EXIT_PLAYER);
     const [answerList, setAnswerlist] = useState(JSON.parse(localStorage.getItem('answerList')) || []);
+    const [nextList, setNextList] = useState(JSON.parse(localStorage.getItem('nextList')) || []);
     const [cookies, setCookie, removeCookie] = useCookies(['game']);
     const [acookies, setaCookie, removeaCookie] = useCookies(['token']);
     const [updateAnswers, { adata, aloading, aerror }] = useMutation(UPDATE_ANSWERS);
+    const [updateNexts, nextData] = useMutation(UPDATE_NEXTS);
     const [scookies, setsCookie, removesCookie] = useCookies(['selects']);
     const [ccookies, setcCookie, removecCookie] = useCookies(['currentIndex']);
-    const [currentQuestion, setCurrentQuestion] = useState(cookies.game.questions[ccookies.currentIndex].question || "")
+    const [currentQuestion, setCurrentQuestion] = useState(location.state.questions[0].question || "")
+    const [players, setPlayers] = useState(location.state.players || [])
     const mounted = useRef(false);
     const [alignment, setAlignment] = useState(null);
     const handleChange = (event, newAlignment) => {
@@ -62,18 +70,22 @@ export const Game = () => {
                 onCompleted(data) {
                     console.log("update completed")
                 },
-                onError(data){console.log(data)}
+                onError(data) { console.log(data) }
             })
         }
         setAlignment(newAlignment);
     };
     const { subscribeToMore, ...result } = useQuery(GAME, {
         variables: {
-            gameId: cookies.game.id
+            gameId: location.state.id
         },
         onCompleted(data) {
             if (mounted) {
-                setGame(data.game)
+                if (data.game.players.length === data.game.initialPlayers) {
+                    setGameStarted(true)
+                    setGame(data.game)
+                    setPlayers(data.game.players)
+                }
             }
         },
         onError(data) {
@@ -104,15 +116,22 @@ export const Game = () => {
             setsCookie('selects', data.data.data.selectsUpdated.selects, { path: '/' });
             console.log("4", scookies.selects)
             if (
-                (data.data.data.selectsUpdated.selects == game.names.length && data.data.data.selectsUpdated.gameId == cookies.game.id)
+                (data.data.data.selectsUpdated.selects == players.length && data.data.data.selectsUpdated.gameId == cookies.game.id)
             ) {
                 console.log("hello")
                 const newIndex = +ccookies.currentIndex + 1
                 console.log("5", newIndex)
-                if (newIndex < game.questions.length){
+                if (newIndex < game.questions.length) {
                     setcCookie('currentIndex', newIndex, { path: '/' })
+                    setAnswerlist([])
+                    setStatus("next")
+                } else {
+                    setStatus("finish")
+                    removeCookie('game')
+                    removeaCookie('token')
+                    removecCookie('currentIndex')
+                    removesCookie('selects')
                 }
-                setIsDone(true)
                 // const votes = answerList.filter(item => item.answer === name);
                 // setCurrentQuestion(game.questions[newIndex].question)
             }
@@ -154,16 +173,101 @@ export const Game = () => {
             console.log(data)
         }
     })
-    const handleNext = () => {
-        const newIndex = +ccookies.currentIndex
-        console.log(game.questions[newIndex])
-        if(+scookies.selects === game.names.length){
-            setsCookie('selects', 0, { path: '/' })
+    useSubscription(NEXT_SUB, {
+
+        onData: (data) => {
+            console.log(data)
+            const nextId = data.data.data.nextUpdated
+            console.log(nextId)
+            let isNew = true;
+            console.log(nextList)
+            const updatedList = nextList.map((next) => {
+                console.log(next)
+                if (next.id == nextId) {
+                    isNew = false
+                }
+                return { id: next.id }
+            })
+            console.log(updatedList)
+            console.log(isNew)
+            if (isNew) {
+                setNextList(current => [...current, { id: nextId }])
+            }
+            else {
+                setNextList(updatedList)
+            }
+            console.log(nextList)
+            console.log(location.state.names.length)
+
+        },
+        onError: (data) => {
+            console.log("error")
+            console.log(data)
+        },
+        onComplete: (data) => {
+            console.log(data)
         }
-        localStorage.removeItem('answerList')
-        setCurrentQuestion(game.questions[newIndex].question)
-        setIsDone(false)
-        setAlignment(null)
+    })
+    useSubscription(PLAYERS_SUB, {
+
+        onData: (data) => {
+            console.log(data.data.data.playersUpdated)
+            setPlayers(data.data.data.playersUpdated)
+            if(!gameStarted && data.data.data.playersUpdated.length === location.state.initialPlayers){
+                setGameStarted(true)
+            }
+        },
+        onError: (data) => {
+            console.log("error")
+            console.log(data)
+        },
+        onComplete: (data) => {
+            console.log(data)
+        }
+    })
+    const handleExit = () => {
+        exitPlayer({
+            variables: {
+                userId: acookies.token,
+                gameId: location.state.id
+            },
+            onCompleted(exit) {
+                console.log(exit)
+                navigate('/')
+
+            },
+            onError(data){
+                console.log(data)
+            }
+        })
+    }
+    const handleStatus = () => {
+        if (status === "next") {
+            updateNexts({
+                variables: {
+                    nextSelectedId: acookies.token
+                },
+                onCompleted(data) {
+                    console.log(data)
+                }
+            })
+        } else if (status === "finish") {
+            navigate('/')
+        }
+
+        // const newIndex = +ccookies.currentIndex
+        // console.log(game.questions[newIndex])
+        // if (+scookies.selects === game.names.length) {
+        //     setsCookie('selects', 0, { path: '/' })
+        // }
+        // if (status === "next") {
+        //     setCurrentQuestion(game.questions[newIndex].question)
+        // }
+        // if (status === "finish") {
+        //     navigate('/')
+        // }
+        // setStatus(null)
+        // setAlignment(null)
     }
     useEffect(() => {
         mounted.current = true;
@@ -184,10 +288,29 @@ export const Game = () => {
             localStorage.removeItem('answerList')
         };
     }, [answerList]);
+    useEffect(() => {
+        localStorage.setItem('nextList', JSON.stringify(nextList));
+        if (nextList.length === players.length) {
+            const newIndex = +ccookies.currentIndex
+            if (+scookies.selects === players.length) {
+                setsCookie('selects', 0, { path: '/' })
+            }
+            if (status === "next") {
+                setCurrentQuestion(game.questions[newIndex].question)
+            }
+            setStatus(null)
+            setAlignment(null)
+        }
+        return () => {
+            localStorage.removeItem('nextList')
+        };
+    }, [nextList]);
     return (
         <div className='game'>
             {
-                !result.loading ? <>
+                // TODO change names to initial num of players
+                // map players instead of names
+                gameStarted ? <>
                     <span>{currentQuestion}</span>
                     <ToggleButtonGroup
                         color="primary"
@@ -198,11 +321,11 @@ export const Game = () => {
                         orientation='vertical'
                     >
 
-                        {cookies.game.names.map((name) => (
-                            <ToggleButton key={name} value={name} >{name}</ToggleButton>
+                        {players.map((player) => (
+                            <ToggleButton key={player.id} value={player.name} >{player.name}</ToggleButton>
                         ))}
                     </ToggleButtonGroup>
-                    <CopyToClipboard text={cookies.game.id}
+                    <CopyToClipboard text={location.state.id}
                         onCopy={() => {
                             if (isMobile) {
                                 toast("copied to clipboard")
@@ -212,7 +335,8 @@ export const Game = () => {
                         }}>
                         <span>Copy</span>
                     </CopyToClipboard>
-                    {isDone ? <Button variant="contained" onClick={handleNext}>Next</Button> : null}
+                    <button onClick={handleExit}>Exit</button>
+                    {status ? <Button variant="contained" onClick={handleStatus}>{status === "next" ? "Next" : "finish"}</Button> : null}
                 </> : <Box sx={{ display: 'flex' }}>
                     <CircularProgress />
                 </Box>

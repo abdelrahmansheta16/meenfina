@@ -4,6 +4,7 @@ import { Group } from "../pages/Group";
 import { JoinGame } from "../pages/JoinGame";
 import { NewGame } from "../pages/NewGame";
 import { Game } from "../pages/Game";
+import { EnterName } from "../pages/EnterName";
 
 export const AllRoutes = () => {
   const user = true;
@@ -13,10 +14,11 @@ export const AllRoutes = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="products" element={<ProductList />} />
+        <Route path="name" element={<EnterName />} />
         <Route path="join" element={<JoinGame />} />
         <Route path="new" element={<NewGame />} />
         <Route path="group" element={<Group />} />
-        <Route path="game" element={<Game />} />
+        <Route path="game/:id" element={<Game />} />
         <Route path="products/:id" element={<ProductDetail />} />
         <Route path="contact" element={<Contact />} >
           <Route path="in" element={<ContactIn />} />
