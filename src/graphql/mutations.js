@@ -33,16 +33,17 @@ mutation UpdateSelects($gameId: String!, $questions: [GameQuestionInput]!, $sele
 }
 `
 export const UPDATE_ANSWERS = gql`
-mutation AnswerSelected($answerSelectedId: String!, $answer: String!) {
-  answerSelected(id: $answerSelectedId, answer: $answer) {
+mutation AnswerSelected($answerSelectedId: String!, $gameId: String!, $answer: String!) {
+  answerSelected(id: $answerSelectedId, gameId: $gameId, answer: $answer) {
     answer
+    gameId
     id
   }
 }
 `
 export const UPDATE_NEXTS = gql`
-mutation NextSelected($nextSelectedId: String!) {
-  nextSelected(id: $nextSelectedId)
+mutation NextSelected($nextSelectedId: String!, $gameId: String!) {
+  nextSelected(id: $nextSelectedId, gameId: $gameId)
 }
 `
 export const EXIT_PLAYER = gql`

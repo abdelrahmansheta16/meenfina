@@ -42,6 +42,7 @@ export const Game = ({ data }) => {
         console.log(acookies.token)
         updateAnswers({
             variables: {
+                gameId:location.state.id,
                 answerSelectedId: acookies.token,
                 answer: newAlignment
             },
@@ -92,24 +93,9 @@ export const Game = ({ data }) => {
             console.log(data)
         }
     });
-    // subscribeToMore({
-    //     document: SELECT_SUB,
-    //     updateQuery: (prev, { subscriptionData }) => {
-    //         if (!subscriptionData.data) return prev;
-    //         const newFeedItem = subscriptionData.data.selectsUpdated;
-    //         console.log("hello")
-    //         if (
-    //             (newFeedItem.selects == game.names.length && newFeedItem.gameId == cookies.game.id)
-    //         ) {
-    //             currentIndex.current++
-    //             setCurrentQuestion(game.questions[currentIndex.current])
-    //         }
-    //     }
-    // })
     useSubscription(SELECT_SUB, {
 
         onData: (data) => {
-            console.log(game.names.length)
             console.log(cookies.game.id)
             console.log(data.data.data.selectsUpdated)
             console.log("3", scookies.selects)
@@ -120,8 +106,7 @@ export const Game = ({ data }) => {
             ) {
                 console.log("hello")
                 const newIndex = +ccookies.currentIndex + 1
-                console.log("5", newIndex)
-                if (newIndex < game.questions.length) {
+                if (newIndex < location.state.questions.length) {
                     setcCookie('currentIndex', newIndex, { path: '/' })
                     setAnswerlist([])
                     setStatus("next")
@@ -135,6 +120,9 @@ export const Game = ({ data }) => {
                 // const votes = answerList.filter(item => item.answer === name);
                 // setCurrentQuestion(game.questions[newIndex].question)
             }
+        },
+        variables: {
+            gameId: location.state.id
         },
         onError: (data) => {
             console.log("error")
@@ -164,6 +152,9 @@ export const Game = ({ data }) => {
             else {
                 setAnswerlist(updatedList)
             }
+        },
+        variables: {
+            gameId: location.state.id
         },
         onError: (data) => {
             console.log("error")
@@ -197,8 +188,10 @@ export const Game = ({ data }) => {
                 setNextList(updatedList)
             }
             console.log(nextList)
-            console.log(location.state.names.length)
 
+        },
+        variables: {
+            gameId: location.state.id
         },
         onError: (data) => {
             console.log("error")
@@ -211,11 +204,14 @@ export const Game = ({ data }) => {
     useSubscription(PLAYERS_SUB, {
 
         onData: (data) => {
-            console.log(data.data.data.playersUpdated)
-            setPlayers(data.data.data.playersUpdated)
-            if(!gameStarted && data.data.data.playersUpdated.length === location.state.initialPlayers){
+            console.log(data.data.data.playersUpdated.players)
+            setPlayers(data.data.data.playersUpdated.players)
+            if(!gameStarted && data.data.data.playersUpdated.players.length === location.state.initialPlayers){
                 setGameStarted(true)
             }
+        },
+        variables:{
+            playersUpdatedGameId2:location.state.id
         },
         onError: (data) => {
             console.log("error")
@@ -245,9 +241,13 @@ export const Game = ({ data }) => {
         if (status === "next") {
             updateNexts({
                 variables: {
+                    gameId:location.state.id,
                     nextSelectedId: acookies.token
                 },
                 onCompleted(data) {
+                    console.log(data)
+                },
+                onError(data){
                     console.log(data)
                 }
             })
