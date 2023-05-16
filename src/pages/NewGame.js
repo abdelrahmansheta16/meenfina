@@ -5,7 +5,7 @@ import AddTask from '../components/AddTask';
 import ShowTask from '../components/ShowTask';
 import { useNavigate } from "react-router-dom"
 import { useMutation, useQuery } from '@apollo/client';
-import { JOIN_PLAYER, NEW_GAME, UPDATE_ANSWER } from '../graphql/mutations';
+import { NEW_GAME } from '../graphql/mutations';
 import { useCookies } from 'react-cookie';
 import { QUESTION } from '../graphql/queries';
 import { useRef } from 'react';
@@ -13,19 +13,18 @@ import Randomstring from 'randomstring';
 
 
 export const NewGame = () => {
-    const [createGame, { data, loading, error }] = useMutation(NEW_GAME);
-    const [joinPlayer, result] = useMutation(JOIN_PLAYER);
+    const [createGame] = useMutation(NEW_GAME);
     const [namesCookies, setnamesCookies, removenamesCookies] = useCookies(['name']);
     const [questions, setQuestions] = useState()
     const mounted = useRef(false);
-    const [cookies, setCookie, removeCookie] = useCookies(['game']);
-    const [ccookies, setcCookie, removecCookie] = useCookies(['currentIndex']);
+    const [setCookie] = useCookies(['game']);
+    const [setcCookie] = useCookies(['currentIndex']);
     const navigate = useNavigate()
     const [task, setTask] = useState("");
     const [tasklist, setTasklist] = useState(namesCookies.name || []);
     const [editid, setEditid] = useState(0);
 
-    const { loading1, error1, data1 } = useQuery(QUESTION, {
+    useQuery(QUESTION, {
         onCompleted(data) {
             console.log(data.questions)
             if (mounted) {
@@ -74,6 +73,7 @@ export const NewGame = () => {
         return () => {
             removenamesCookies('name', { path: '/' })
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tasklist]);
 
     useEffect(() => {

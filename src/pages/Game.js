@@ -2,17 +2,16 @@ import * as React from 'react';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import '../data/data'
-import { BrowserView, MobileView, isBrowser, isMobile } from 'react-device-detect';
+import { isMobile } from 'react-device-detect';
 import { useMutation, useQuery, useSubscription } from '@apollo/client';
 import { GAME } from '../graphql/queries';
 import { useState } from 'react';
 import { useEffect } from 'react';
-import { useLayoutEffect } from 'react';
 import { useRef } from 'react';
 import { Box, Button, CircularProgress } from '@mui/material';
-import { get, useCookies } from 'react-cookie'
-import { ANSWERS_SUB, ANSWER_SUB, NEXT_SUB, PLAYERS_SUB, SELECT_SUB } from '../graphql/subscriptions';
-import { EXIT_PLAYER, JOIN_PLAYER, UPDATE_ANSWER, UPDATE_ANSWERS, UPDATE_GAME, UPDATE_NEXTS } from '../graphql/mutations';
+import { useCookies } from 'react-cookie'
+import { ANSWERS_SUB, NEXT_SUB, PLAYERS_SUB, SELECT_SUB } from '../graphql/subscriptions';
+import { EXIT_PLAYER, UPDATE_ANSWERS, UPDATE_GAME, UPDATE_NEXTS } from '../graphql/mutations';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { toast } from 'react-toastify';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -23,26 +22,26 @@ export const Game = ({ data }) => {
     const [game, setGame] = useState({})
     const [gameStarted, setGameStarted] = useState()
     const [status, setStatus] = useState(null)
-    const [updateGame, { data1, loading1, error1 }] = useMutation(UPDATE_GAME);
-    const [exitPlayer, exitData] = useMutation(EXIT_PLAYER);
+    const [updateGame] = useMutation(UPDATE_GAME);
+    const [exitPlayer] = useMutation(EXIT_PLAYER);
     const [answerList, setAnswerlist] = useState(JSON.parse(localStorage.getItem('answerList')) || []);
     const [nextList, setNextList] = useState(JSON.parse(localStorage.getItem('nextList')) || []);
-    const [cookies, setCookie, removeCookie] = useCookies(['game']);
-    const [acookies, setaCookie, removeaCookie] = useCookies(['token']);
-    const [updateAnswers, { adata, aloading, aerror }] = useMutation(UPDATE_ANSWERS);
-    const [updateNexts, nextData] = useMutation(UPDATE_NEXTS);
+    const [cookies, removeCookie] = useCookies(['game']);
+    const [acookies, removeaCookie] = useCookies(['token']);
+    const [updateAnswers] = useMutation(UPDATE_ANSWERS);
+    const [updateNexts] = useMutation(UPDATE_NEXTS);
     const [scookies, setsCookie, removesCookie] = useCookies(['selects']);
     const [ccookies, setcCookie, removecCookie] = useCookies(['currentIndex']);
     const [currentQuestion, setCurrentQuestion] = useState(location.state.questions[0].question || "")
     const [players, setPlayers] = useState(location.state.players || [])
     const mounted = useRef(false);
     const [alignment, setAlignment] = useState(null);
-    const handleChange = (event, newAlignment) => {
+    const handleChange = (_, newAlignment) => {
         console.log(game)
         console.log(acookies.token)
         updateAnswers({
             variables: {
-                gameId:location.state.id,
+                gameId: location.state.id,
                 answerSelectedId: acookies.token,
                 answer: newAlignment
             },
@@ -51,7 +50,7 @@ export const Game = ({ data }) => {
             }
         })
         const updatedQuestions = cookies.game.questions.map((question, index) => {
-            if (index == ccookies.currentIndex) {
+            if (index === ccookies.currentIndex) {
                 console.log("1", scookies.selects)
                 scookies.selects++
                 console.log("2", scookies.selects)
@@ -76,7 +75,8 @@ export const Game = ({ data }) => {
         }
         setAlignment(newAlignment);
     };
-    const { subscribeToMore, ...result } = useQuery(GAME, {
+
+    useQuery(GAME, {
         variables: {
             gameId: location.state.id
         },
@@ -102,7 +102,7 @@ export const Game = ({ data }) => {
             setsCookie('selects', data.data.data.selectsUpdated.selects, { path: '/' });
             console.log("4", scookies.selects)
             if (
-                (data.data.data.selectsUpdated.selects == players.length && data.data.data.selectsUpdated.gameId == cookies.game.id)
+                (data.data.data.selectsUpdated.selects === players.length && data.data.data.selectsUpdated.gameId === cookies.game.id)
             ) {
                 console.log("hello")
                 const newIndex = +ccookies.currentIndex + 1
@@ -140,7 +140,7 @@ export const Game = ({ data }) => {
             let isNew = true;
             const updatedList = answerList.map((answer) => {
                 console.log(answer)
-                if (answer.id == data.data.data.answerUpdated.id) {
+                if (answer.id === data.data.data.answerUpdated.id) {
                     answer.answer = data.data.data.answerUpdated.answer
                     isNew = false
                 }
@@ -174,7 +174,7 @@ export const Game = ({ data }) => {
             console.log(nextList)
             const updatedList = nextList.map((next) => {
                 console.log(next)
-                if (next.id == nextId) {
+                if (next.id === nextId) {
                     isNew = false
                 }
                 return { id: next.id }
@@ -206,12 +206,12 @@ export const Game = ({ data }) => {
         onData: (data) => {
             console.log(data.data.data.playersUpdated.players)
             setPlayers(data.data.data.playersUpdated.players)
-            if(!gameStarted && data.data.data.playersUpdated.players.length === location.state.initialPlayers){
+            if (!gameStarted && data.data.data.playersUpdated.players.length === location.state.initialPlayers) {
                 setGameStarted(true)
             }
         },
-        variables:{
-            playersUpdatedGameId2:location.state.id
+        variables: {
+            playersUpdatedGameId2: location.state.id
         },
         onError: (data) => {
             console.log("error")
@@ -232,7 +232,7 @@ export const Game = ({ data }) => {
                 navigate('/')
 
             },
-            onError(data){
+            onError(data) {
                 console.log(data)
             }
         })
@@ -241,13 +241,13 @@ export const Game = ({ data }) => {
         if (status === "next") {
             updateNexts({
                 variables: {
-                    gameId:location.state.id,
+                    gameId: location.state.id,
                     nextSelectedId: acookies.token
                 },
                 onCompleted(data) {
                     console.log(data)
                 },
-                onError(data){
+                onError(data) {
                     console.log(data)
                 }
             })
@@ -281,6 +281,7 @@ export const Game = ({ data }) => {
         return () => {
             removesCookie('selects', { path: '/' })
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
     useEffect(() => {
         localStorage.setItem('answerList', JSON.stringify(answerList));
@@ -304,6 +305,7 @@ export const Game = ({ data }) => {
         return () => {
             localStorage.removeItem('nextList')
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [nextList]);
     return (
         <div className='game'>

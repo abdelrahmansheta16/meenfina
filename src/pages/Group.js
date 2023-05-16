@@ -12,11 +12,10 @@ export const Group = () => {
     const navigate = useNavigate()
     const [sliderValue, setSliderValue] = useState(3)
     const [questions, setQuestions] = useState()
-    const [namesCookies, setnamesCookies, removenamesCookies] = useCookies(['name']);
-    const [cookies, setCookie, removeCookie] = useCookies(['game']);
-    const [ccookies, setcCookie, removecCookie] = useCookies(['currentIndex']);
-    const [createGame, { data, loading, error }] = useMutation(NEW_GAME);
-    const { loading1, error1, data1 } = useQuery(QUESTION, {
+    const [gameCookie] = useCookies(['game']);
+    const [indexCookie] = useCookies(['currentIndex']);
+    const [createGame] = useMutation(NEW_GAME);
+    useQuery(QUESTION, {
         onCompleted(data) {
             console.log(data.questions)
             setQuestions(data.questions)
@@ -44,10 +43,9 @@ export const Group = () => {
             onCompleted(data) {
                 console.log(data)
                 const token = Randomstring.generate(10)
-                const id = data.createGame.id
-                setCookie('game', data.createGame, { path: '/' })
-                setCookie('token', token, { path: '/' })
-                setcCookie('currentIndex', 0, { path: '/' })
+                gameCookie.game.setCookie('game', data.createGame, { path: '/' })
+                gameCookie.game.setCookie('token', token, { path: '/' })
+                indexCookie.currentIndex.setcCookie('currentIndex', 0, { path: '/' })
                 return navigate(`/name`, { state: data.createGame })
             },
             onError(data) {

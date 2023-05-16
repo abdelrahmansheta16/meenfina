@@ -1,19 +1,16 @@
 import React from 'react'
-import Box from '@mui/material/Box';
-import TextField from '@mui/material/TextField';
 import { useState } from 'react';
 import { useCookies } from 'react-cookie';
 import { useNavigate } from 'react-router-dom';
 import { GAME } from '../graphql/queries';
-import { useLazyQuery, useMutation, useQuery } from '@apollo/client';
+import { useLazyQuery } from '@apollo/client';
 import Randomstring from 'randomstring';
-import { JOIN_PLAYER } from '../graphql/mutations';
 export const JoinGame = () => {
     const [gameId, setGameId] = useState("")
-    const [getGame, { loading, error, data }] = useLazyQuery(GAME);
+    const [getGame] = useLazyQuery(GAME);
     const navigate = useNavigate()
-    const [cookies, setCookie, removeCookie] = useCookies(['game']);
-    const [ccookies, setcCookie, removecCookie] = useCookies(['currentIndex']);
+    const [setCookie] = useCookies(['game']);
+    const [setcCookie] = useCookies(['currentIndex']);
 
     const handleSubmit = (event) => {
         event.preventDefault()
@@ -22,7 +19,6 @@ export const JoinGame = () => {
             onCompleted(data) {
                 console.log(data)
                 const token = Randomstring.generate(10)
-                const id = data.game.id
                 setCookie('game', data.game, { path: '/' })
                 setCookie('token', token, { path: '/' })
                 setcCookie('currentIndex', 0, { path: '/' })

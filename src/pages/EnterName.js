@@ -8,9 +8,9 @@ import { useCookies } from 'react-cookie';
 export const EnterName = () => {
     const navigate = useNavigate()
     const location = useLocation()
-    const [acookies, setaCookie, removeaCookie] = useCookies(['token']);
+    const [acookies] = useCookies(['token']);
     const [name, setName] = useState()
-    const [joinPlayer, joinData] = useMutation(JOIN_PLAYER);
+    const [joinPlayer] = useMutation(JOIN_PLAYER);
 
     const handleSubmit = () => {
         joinPlayer({
