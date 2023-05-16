@@ -38,8 +38,8 @@ export const GroupName = () => {
                         </div>
                     </div>
                     <div className="flex flex-row justify-evenly">
-                        <img src={backButton} alt="" className="z-10 max-w-sm" style={{ "width": "20%" }} onClick={handleNext} />
-                        <img src={nextButton} alt="" className="z-10 max-w-sm" style={{ "width": "20%" }} onClick={handleBack} />
+                        <img src={backButton} alt="" className="z-10 max-w-sm" style={{ "width": "20%" }} onClick={handleBack} />
+                        <img src={nextButton} alt="" className="z-10 max-w-sm" style={{ "width": "20%" }} onClick={handleNext} />
                     </div>
 
                 </div>
