@@ -18,22 +18,22 @@ export const Home = () => {
   return (
     <main>
       <section className="h-screen">
-        <div className="absolute top-0 left-0">
-          <img src={mark} alt="" className="w-3/4" />
+        <div >
+          <img src={mark} alt="" className="absolute top-0 left-0" style={{ "width": "20%" }} />
         </div>
-        <div className="w-210 absolute bottom-0 left-0">
-          <img src={dot} alt="" />
+        <div>
+          <img src={dot} alt="" className="absolute bottom-0 left-0" style={{ "width": "20%" }} />
         </div>
-        <div className="w-210 absolute bottom-0 right-0">
-          <img src={markr} alt="" />
+        <div>
+          <img src={markr} alt="" className="absolute bottom-0 right-0" style={{ "width": "20%" }} />
         </div>
         <div className="static flex flex-col justify-center h-full">
           <div className="flex justify-center">
-            <img src={logo} alt="" className="w-639 h-374 max-w-sm p-10" />
+            <img src={logo} alt="" className="max-w-sm p-10" style={{ "width": "40%" }} />
           </div>
           <div className="flex flex-row justify-center">
-            <img src={playbutton} alt="" className="w-20 h-107 max-w-xs" />
-            <img src={letsplay} alt="" className="cursor-pointer w-336 h-116 max-w-xs p-10" onClick={handleJoin} />
+            <img src={playbutton} alt="" className="max-w-xs" style={{ "width": "10%" }} />
+            <img src={letsplay} alt="" className="cursor-pointer max-w-xs p-10" style={{ "width": "40%" }} onClick={handleJoin} />
           </div>
         </div>
 
