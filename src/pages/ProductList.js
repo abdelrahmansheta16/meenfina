@@ -1,4 +1,3 @@
-import { useSearchParams, useLocation } from "react-router-dom";
 
 export const ProductList = () => {
   // const [searchParams] = useSearchParams();
