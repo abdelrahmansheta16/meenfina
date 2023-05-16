@@ -1,12 +1,13 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { Home, Admin, ProductList, ProductDetail, Contact, ContactIn, ContactEu, ContactUs, PageNotFound } from "../pages";
-import { Group } from "../pages/Group";
-import { JoinGame } from "../pages/JoinGame";
 import { NewGame } from "../pages/NewGame";
 import { Game } from "../pages/Game";
-import { EnterName } from "../pages/EnterName";
 import { Play } from "../pages/Play";
 import { Questions } from "../pages/Questions";
+import { Group2 } from "../pages/Group2";
+import { Name } from "../pages/Name";
+import { Join } from "../pages/Join";
+import { GroupName } from "../pages/GroupName";
 
 export const AllRoutes = () => {
   const user = true;
@@ -16,12 +17,14 @@ export const AllRoutes = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="products" element={<ProductList />} />
-        <Route path="name" element={<EnterName />} />
+        {/* <Route path="name" element={<EnterName />} /> */}
         <Route path="play" element={<Play />} />
         <Route path="questions" element={<Questions />} />
-        <Route path="join" element={<JoinGame />} />
+        <Route path="name" element={<Name />} />
+        <Route path="join" element={<Join />} />
         <Route path="new" element={<NewGame />} />
-        <Route path="group" element={<Group />} />
+        <Route path="group" element={<Group2 />} />
+        <Route path="groupName" element={<GroupName />} />
         <Route path="game/:id" element={<Game />} />
         <Route path="products/:id" element={<ProductDetail />} />
         <Route path="contact" element={<Contact />} >

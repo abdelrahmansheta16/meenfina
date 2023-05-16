@@ -10,7 +10,7 @@ export const Home = () => {
   const navigate = useNavigate()
   const handleJoin = () => {
 
-    return navigate("/join")
+    return navigate("/play")
   }
   // const handleNew = () => {
   //   return navigate("/group")
@@ -19,21 +19,21 @@ export const Home = () => {
     <main>
       <section className="h-screen">
         <div >
-          <img src={mark} alt="" className="absolute top-0 left-0" style={{ "width": "20%" }} />
+          <img src={mark} alt="" className="absolute top-0 left-0" style={{ "width": "40%" }} />
         </div>
         <div>
-          <img src={dot} alt="" className="absolute bottom-0 left-0" style={{ "width": "20%" }} />
+          <img src={dot} alt="" className="absolute bottom-0 left-0" style={{ "width": "40%" }} />
         </div>
         <div>
-          <img src={markr} alt="" className="absolute bottom-0 right-0" style={{ "width": "20%" }} />
+          <img src={markr} alt="" className="absolute bottom-0 right-0" style={{ "width": "30%" }} />
         </div>
         <div className="static flex flex-col justify-center h-full">
           <div className="flex justify-center">
-            <img src={logo} alt="" className="max-w-sm p-10" style={{ "width": "40%" }} />
+            <img src={logo} alt="" className="max-w-sm p-1 mb-5 z-10" style={{ "width": "70%" }} />
           </div>
           <div className="flex flex-row justify-center">
-            <img src={playbutton} alt="" className="max-w-xs" style={{ "width": "10%" }} />
-            <img src={letsplay} alt="" className="cursor-pointer max-w-xs p-10" style={{ "width": "40%" }} onClick={handleJoin} />
+            <img src={playbutton} alt="" className="max-w-xs mx-4 z-10" style={{ "width": "15%" }} />
+            <img src={letsplay} alt="" className="cursor-pointer max-w-xs mx-4 z-10" style={{ "width": "40%" }} onClick={handleJoin} />
           </div>
         </div>
 
